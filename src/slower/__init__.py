@@ -4,8 +4,9 @@ __all__ = [
     "Slower",
 ]
 
+
 class Slower:
-    
+
     def __init__(self, n, seconds=60):
         self.queue = asyncio.Queue(maxsize=n)
         self.lock = asyncio.Lock()
@@ -21,9 +22,7 @@ class Slower:
                 await self.queue.put(i)
 
         # Schedule items to be released
-        release_task = asyncio.create_task(
-            self._release(n)
-        )
+        release_task = asyncio.create_task(self._release(n))
         # Strong reference to task to prevent garbage collection
         self.tasks.add(release_task)
         # Discard references when done
