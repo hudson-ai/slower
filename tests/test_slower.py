@@ -1,24 +1,36 @@
+import pytest
+
 import asyncio
 import time
+from more_itertools import sliding_window
+
 from slower import Slower
 
+def no_faster_than(times, n, seconds):
+    for window in sliding_window(sorted(times), n):
+        if (window[-1] - window[0]) < seconds:
+            return False
+    return True
 
-async def test_sequential():
-    async with Slower(5, seconds=1) as sem:
-        for i in range(100):
-            await sem.acquire(1)
-            await asyncio.sleep(3)
-            print(i, time.monotonic())
-            await sem.release(1)
- 
-async def test_concurrent():
-    async def do(i, sem):
-        await sem.acquire(1)
-        await asyncio.sleep(3)
-        print(i, time.monotonic())
-        await sem.release(1)
+def no_slower_than(times, n, seconds):
+    for window in sliding_window(sorted(times), n):
+        if (window[-1] - window[0]) > seconds:
+            return False
+    return True
 
-    async with Slower(5, seconds=1) as sem:
-        tasks = [do(i, sem) for i in range(20)]
-        await asyncio.gather(*tasks)
+async def do(response_time, s: Slower):
+    # Simulate a response from a server.
+    await s.acquire()
+    recieve_time = time.monotonic()
+    await asyncio.sleep(response_time)
+    return recieve_time
 
+@pytest.mark.parametrize("n", (1, 10, 100, 1000))
+@pytest.mark.parametrize("seconds", (.1, .5, 1))
+@pytest.mark.parametrize("response_time", (0, .1, .5))
+async def test_slower(n, seconds, response_time):
+    async with Slower(n, seconds) as s:
+        jobs = [do(response_time, s) for _ in range(2*n)]
+        times = await asyncio.gather(*jobs)
+    assert no_faster_than(times, n+1, seconds)
+    assert no_slower_than(times, n, seconds + .1)
