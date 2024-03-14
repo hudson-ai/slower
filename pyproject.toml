@@ -2,11 +2,20 @@
 name = "slower"
 version = "0.0.1"
 authors = [
-    { name="Hudson Cooperi", email="hncooper96@gmail.com" },
+    { name="Hudson Cooper", email="hncooper96@gmail.com" },
 ]
 description = "Make things slower"
 dependencies = []
 
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-asyncio",
+]
+
 [project.urls]
 source = "https://github.com/hudson-ai/slower"
 download = "https://pypi.org/project/slower/#files"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

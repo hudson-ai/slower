@@ -8,7 +8,7 @@ install: build
 	pip install dist/*.tar.gz
 
 develop:
-	pip install -e .
+	pip install -e .[dev]
 
 check:
 	pytest -v tests

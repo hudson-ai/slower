@@ -1,7 +1,10 @@
 import asyncio
-import time
 
-class RateLimit:
+__all__ = [
+    "Slower",
+]
+
+class Slower:
     
     def __init__(self, n, seconds=60):
         self.queue = asyncio.Queue(maxsize=n)
