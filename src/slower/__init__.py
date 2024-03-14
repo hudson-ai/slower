@@ -20,7 +20,6 @@ class Slower:
             for i in range(n):
                 await self.queue.put(i)
 
-    async def release(self, n=1):
         # Schedule items to be released
         release_task = asyncio.create_task(
             self._release(n)
@@ -39,7 +38,7 @@ class Slower:
         # Cancel and clear release_tasks
         for task in self.tasks:
             task.cancel()
-        self.tasks = {}
+        self.tasks = set()
         # Clean up remaining items in the queue
         for i in range(self.queue.qsize()):
             self.queue.get_nowait()
