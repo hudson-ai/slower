@@ -1,15 +1,15 @@
 import asyncio
 import time
 
-class SoftSemaphore:
-
+class RateLimit:
+    
     def __init__(self, n, seconds=60):
         self.queue = asyncio.Queue(maxsize=n)
         self.lock = asyncio.Lock()
         self.seconds = seconds
         self.tasks = set()
 
-    async def acquire(self, n):
+    async def acquire(self, n=1):
         if n > self.queue.maxsize:
             raise ValueError(f"Can't aquire more than {self.queue.maxsize}")
         # Use lock to prevent deadlock
@@ -17,7 +17,7 @@ class SoftSemaphore:
             for i in range(n):
                 await self.queue.put(i)
 
-        # TODO: Put all below in dedicated release method?
+    async def release(self, n=1):
         # Schedule items to be released
         release_task = asyncio.create_task(
             self._release(n)
